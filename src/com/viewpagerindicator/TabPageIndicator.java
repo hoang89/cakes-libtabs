@@ -22,12 +22,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.GpsStatus.NmeaListener;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -136,7 +136,12 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 	public void animateToTab(final int position)
 	{
 		final TabView2 tabView = (TabView2) mTabLayout.getChildAt(position);
-		tabView.removeTextView();
+		tabView.setTabCount(tabView.getTabCount()+1);
+		if(tabView.getTabCount() == 2)
+		{
+			tabView.removeTextView();
+		}
+		
 		if (mTabSelector != null)
 		{
 			removeCallbacks(mTabSelector);
@@ -300,7 +305,8 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 			}
 		}
 	}
-
+	
+	/*
 	public void setCurrentChoise(int item)
 	{
 		if (mViewPager == null)
@@ -326,13 +332,15 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 			}
 		}
 	}
+	*/
 
 	@Override
 	public void setOnPageChangeListener(OnPageChangeListener listener)
 	{
 		mListener = listener;
 	}
-
+	
+	/*
 	private class TabView extends TextView
 	{
 		private int mIndex;
@@ -365,6 +373,7 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 			return mIndex;
 		}
 	}
+	*/
 
 	private class TabView2 extends LinearLayout
 	{
@@ -374,17 +383,21 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 		private TextView textView;
 		private TextView numView;
 		private Context context;
+		private int tabCount;
 
 		public TabView2(Context context, CharSequence text) {
 			super(context);
 			setOrientation(LinearLayout.HORIZONTAL);
 			this.context = context;
 			this.text = text.toString();
+			this.tabCount = 0;
 			setGravity(Gravity.CENTER);
 			int w = 70;
 			if (context instanceof Activity)
 			{
-				w = (int) (((Activity) context).getWindowManager().getDefaultDisplay().getWidth() / 4.5);
+				DisplayMetrics metrics = new DisplayMetrics();
+				((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+				w =(int) (metrics.widthPixels / 4.5);
 			} else
 			{
 				w = (int) convertDpToPixel(w, context);
@@ -398,10 +411,20 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 		{
 			return mIndex;
 		}
+		
+		
+		public int getTabCount()
+		{
+			return tabCount;
+		}
+
+		public void setTabCount(int tabCount)
+		{
+			this.tabCount = tabCount;
+		}
 
 		public void setText()
 		{
-			Log.e("Text", "Text: " + this.text);
 			String[] s = text.split("#");
 			if (s.length > 0)
 				this.text = s[0];
@@ -414,7 +437,6 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 			textView.setText(this.text);
 			textView.setTextColor(Color.parseColor("#333333"));
 			addView(textView);
-			Log.e("num", "Num: " + this.num);
 			if (this.num != null && !this.num.equals(""))
 			{
 				numView = new TextView(context);
@@ -423,6 +445,7 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
 				numView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 				numView.setText(num);
 				numView.setGravity(Gravity.CENTER);
+				numView.setTextColor(Color.WHITE);
 				numView.setBackgroundResource(R.drawable.circle);
 				addView(numView);
 			}
